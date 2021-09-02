@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  prepare:
+    name: Prepare environment variables
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get active branch name
+        run: echo "GIT_BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
+      - name: Prepare outputs
+        id: prepare-step
+        run: echo "::set-output name=ssh_host_name::${GITHUB_BRANCH}_SSH_HOST"
+    outputs:
+      ssh_host_name: ${{ steps.prepare-step.outputs.ssh_host_name }}
+
+  build:
+    name: Deploy build to the machine
+    needs:
+      - prepare
+    runs-on: ubuntu-latest
+    env:
+      SSH_HOST_NAME: ${{ needs.prepare.outputs.ssh_host_name }}
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Output result
+        run: |
+          echo ${GITHUB_BRANCH}
+          echo ${env.SSH_HOST_NAME}
