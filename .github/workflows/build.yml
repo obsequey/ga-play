@@ -11,11 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Get active branch name
-        run: echo "GIT_BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
+      - name: Set output
+        id: vars
+        run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
       - name: Prepare outputs
         id: prepare-step
-        run: echo "::set-output name=ssh_host_name::${GITHUB_BRANCH}_SSH_HOST"
+        run: echo "::set-output name=ssh_host_name::${{ steps.vars.outputs.short_ref }}_SSH_HOST"
     outputs:
       ssh_host_name: ${{ steps.prepare-step.outputs.ssh_host_name }}
 
